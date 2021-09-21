@@ -1,0 +1,7 @@
+In this project we are going to write a kernel module
+that uses /proc file system to display information
+about a process by using its pid.
+
+echo "1395" > /proc/pid
+cat /proc/pid
+command = [bash] pid = [1395] state = [1]
