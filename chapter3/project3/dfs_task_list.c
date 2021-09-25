@@ -1,6 +1,6 @@
 /*
 	 Linux kernel module for listing tasks.
-	 This version module iterates over all tasks on
+	 This version of module iterates over all tasks on
 	 system by using Depth-First Search(DFS) Tree.
  */
 
