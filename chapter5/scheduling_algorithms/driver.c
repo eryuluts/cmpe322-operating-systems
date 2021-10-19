@@ -120,7 +120,7 @@ struct ListHead *parse_task_file(const char *filename)
 #define SCH_ALG RR_PRIORITY 
 
 #else
-#define SCH_ALG RR_PRIORITY
+#define SCH_ALG FCFS
 #endif
 
 #define SCH_STR(alg) TO_STR(alg)

@@ -77,6 +77,6 @@ by scheduler.
 We are going to write a make file. We are going to have a different
 built version of driver for each scheduling algorithm.  
 
-    make fcfs  
+    make ALG=PP_FCFS  
 Builts driver for that drives scheduler in fcfs mode.
 

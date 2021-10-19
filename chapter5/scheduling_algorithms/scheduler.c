@@ -322,66 +322,45 @@ struct Task *SelectNextRrPriority(struct ListHead *head)
       count_down = TIME_QUANTUM;
       {
         struct Task *important_task = 0;
-        static int behind_cur; 
-        for (struct ListHead *cursor = cur->next; cursor != cur;
-            cursor = cursor->next)
+        struct ListHead *current = cur;
+        for (struct ListHead *cur = head->next; cur != head;
+            cur = cur->next)
         {
-          /*
-           * I use this variable to toggle when I loop over head
-           * to behind cur. When I'm in that situation I only want to
-           * switch to a new task if that tasks priority is higher
-           * and not equal. Because otherwise I'm going to switch
-           * between only two tasks that have same priority.
-           * I added this property to algorithm because if a new task
-           * added to list with high priority I want to be able to
-           * switch to it after current task finished its time quanta.
-           */
-          if (cursor == head)
+          if (cur == current)
           {
-            behind_cur = 1;
             continue;
           }
 
-          if (!cursor)
+          if (!cur)
           {
             fprintf(stderr, "error: corrupted circular list\n");
             exit(1);
           }
 
-          struct Task *task = LIST_ENTRY(cursor, struct Task, head);
+          struct Task *task = LIST_ENTRY(cur, struct Task, head);
           if (!important_task)
           {
             important_task = task;
           }
           else
           {
-            int condition; 
-            if (behind_cur)
-            {
-              condition = task->priority > important_task->priority;
-            }
-            else
-            {
-              condition = task->priority >= important_task->priority;
-            }
-
+            int condition = task->priority > important_task->priority;
             if (condition)
             {
               important_task = task;
             }
           }
         }
-        behind_cur = 0;
         cur = &important_task->head;
+        /*
+         * Clearing ready queue is not a duty of "selection from read
+         * queue" process. That is why I'm returning a task with
+         * 0 burst left as a candidate to execute. I expect scheduler to
+         * clear this task from ready queue after I return.
+         * A task with 1 burst left is returned for last execution.
+         */
+        return task;  
       }
-      /*
-       * Clearing ready queue is not a duty of "selection from read
-       * queue" process. That is why I'm returning a task with
-       * 0 burst left as a candidate to execute. I expect scheduler to
-       * clear this task from ready queue after I return.
-       * A task with 1 burst left is returned for last execution.
-       */
-      return task;  
     }
   }
   else
@@ -389,23 +368,11 @@ struct Task *SelectNextRrPriority(struct ListHead *head)
     count_down = TIME_QUANTUM - 1; // Need to count this cycle too
       {
         struct Task *important_task = task;
-        static int behind_cur; 
         for (struct ListHead *cursor = cur->next; cursor != cur;
             cursor = cursor->next)
         {
-          /*
-           * I use this variable to toggle when I loop over head
-           * to behind cur. When I'm in that situation I only want to
-           * switch to a new task if that tasks priority is higher
-           * and not equal. Because otherwise I'm going to switch
-           * between only two tasks that have same priority.
-           * I added this property to algorithm because if a new task
-           * added to list with high priority I want to be able to
-           * switch to it after current task finished its time quanta.
-           */
           if (cursor == head)
           {
-            behind_cur = 1;
             continue;
           }
 
@@ -416,22 +383,13 @@ struct Task *SelectNextRrPriority(struct ListHead *head)
           }
 
           struct Task *task = LIST_ENTRY(cursor, struct Task, head);
-          int condition; 
-          if (behind_cur)
-          {
-            condition = task->priority > important_task->priority;
-          }
-          else
-          {
-            condition = task->priority >= important_task->priority;
-          }
-
+          int condition = task->priority >= important_task->priority;
           if (condition)
           {
             important_task = task;
+            break;
           }
         }
-        behind_cur = 0;
         cur = &important_task->head;
       }
     task = LIST_ENTRY(cur, struct Task, head);
