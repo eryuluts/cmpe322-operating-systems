@@ -10,6 +10,9 @@
 #include "list.h"
 #include <stdarg.h>
 
+/* For atomic increment in Windows API */
+#include <Windows.h>
+
 #define LINE_SIZE 1024
 
 void ErrorExit(const char *fmt, ...)
@@ -26,6 +29,8 @@ void ErrorExit(const char *fmt, ...)
 #define TO_STR(s) #s
 #define FORMAT_STR(count)\
   " %" TO_STR(count) "[a-zA-Z0-9], %" SCNu8 ", %" SCNu32
+
+int pid = 1;
 
 /*
  * First we need to parse file that contains information about tasks and
@@ -56,12 +61,12 @@ struct ListHead *parse_task_file(const char *filename)
   while (1)
   {
     char buffer[LINE_SIZE];
-    struct Task task;
+    struct Task task = {0};
     if (fgets(buffer, LINE_SIZE, fp))
     {
       int count = sscanf(buffer, FORMAT_STR(NAME_LENGTH),
-        task.task_name, &task.priority, &task.burst
-      );
+          task.task_name, &task.priority, &task.burst
+          );
 
       if (count == 3)
       {
@@ -72,6 +77,9 @@ struct ListHead *parse_task_file(const char *filename)
           ErrorExit("Out of memory");
         }
         *ptask = task;
+        ptask->pid = pid;
+        ptask->burst_init = ptask->burst;
+        InterlockedIncrement(&pid);
         ListAdd(&ptask->head, list_head->prev); 
       }
       else
@@ -81,7 +89,7 @@ struct ListHead *parse_task_file(const char *filename)
           ErrorExit("Schedule of tasks file is empty: %s", filename);
         }
         fprintf(stderr, "Corrupted entry: line %d: %s\n",
-                nline, filename);
+            nline, filename);
       }
       nline++;  // increase line count
     }

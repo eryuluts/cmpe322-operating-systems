@@ -14,6 +14,9 @@ struct Task *PickNextTask(struct ListHead *head, enum Algorithm nalgorithm);
 void Schedule(struct ListHead *head, enum Algorithm nalgorithm)
 {
   struct Task *task;
+  float sum_turn_around = 0, sum_wait = 0, sum_response = 0;
+  int ntask = 0;
+
   puts("------Execution Starting-------");
   while(1)
   {
@@ -22,6 +25,11 @@ void Schedule(struct ListHead *head, enum Algorithm nalgorithm)
     {
       if (task->burst)
       {
+        if (!task->response_time)
+        {
+          /* set time needed to start responding for particular task */
+          task->response_time = clock();
+        }
 //        printf("RUN: task name %s priority %d burst %d\n",
 //              task->task_name, task->priority, task->burst);
         run(task);
@@ -30,6 +38,15 @@ void Schedule(struct ListHead *head, enum Algorithm nalgorithm)
       if (!task->burst)
       {
         printf("Execution of task: %s finished\n", task->task_name);
+        task->turn_around = clock();
+        /* we don't have any blocking calls so we can make this calc */
+        task->wait_time = task->turn_around - task->burst_init;
+
+        ntask++;
+        sum_turn_around += task->turn_around;
+        sum_wait += task->wait_time;
+        sum_response += task->response_time;
+
         ListDel(&task->head); 
         free(task);  // ListDel only deletes element from queue 
       }
@@ -37,6 +54,18 @@ void Schedule(struct ListHead *head, enum Algorithm nalgorithm)
     else
     {
       puts("All tasks in ready queue are terminated");
+      printf("SUM VALUES:\ntotal turn around: %.2f\n"
+              "total wait time: %.2f\n"
+              "sum response time: %.2f\n",
+              sum_turn_around,
+              sum_wait,
+              sum_response);
+      printf("AVG VALUES:\naverage turn around: %.2f\n"
+              "average wait time: %.2f\n"
+              "average response time: %.2f\n",
+              sum_turn_around/ntask,
+              sum_wait/ntask,
+              sum_response/ntask);
       break;
     }
   }
