@@ -13,5 +13,9 @@ $(SRCDIR)/cpu.h $(SRCDIR)/list.h
 driver.obj : $(SRCDIR)/driver.c $(SRCDIR)/list.h 
 	$(CC) /c /D$(ALG) $(SRCDIR)/driver.c 
 
+driver_alg: cpu.obj scheduler.obj
+	$(CC) /c /D$(ALG) $(SRCDIR)/driver.c 
+	link driver.obj scheduler.obj cpu.obj /OUT:driver.exe
+	
 clean:
 	rm cpu.obj scheduler.obj driver.obj driver.exe

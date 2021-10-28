@@ -124,7 +124,7 @@ struct ListHead *parse_task_file(const char *filename)
 #elif defined(PP_RR)
 #define SCH_ALG RR
 
-#elif defined(PP_PRIORITY)
+#elif defined(PP_RR_PRIORITY)
 #define SCH_ALG RR_PRIORITY 
 
 #else

@@ -4,7 +4,7 @@ ALG ?= PP_FCFS
 export ALG CC
 
 all:
-	$(MAKE) -C $(build-dir) SRCDIR=$(CURDIR) driver.exe
+	$(MAKE) -C $(build-dir) SRCDIR=$(CURDIR) $(TARGET)
 
 clean:
 	$(MAKE) -C $(build-dir) clean
