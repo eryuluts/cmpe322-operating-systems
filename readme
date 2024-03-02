@@ -1,1 +1,4 @@
+Solutions for exercises in the Operating System Concepts book.
+
 kernel-release: 4.15.0-142-generic
+Textbook: Abraham Silberschatz, Greg Gagne, Peter B. Galvin - Operating System Concepts (2018, Wiley)
